@@ -6,7 +6,7 @@ import pickle
 class stuff:
     def __init__(self):
 
-       
+
         with open("internal1", "rb") as myfile:
             self.client_secret = pickle.load(myfile)
         with open("internal2", "rb") as myfile:
