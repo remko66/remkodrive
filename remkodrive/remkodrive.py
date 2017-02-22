@@ -12,6 +12,7 @@ from threading import *
 import subprocess
 import inotify.adapters
 import log
+import time
 
 
 class SystemTrayIcon(QtGui.QSystemTrayIcon):
@@ -157,22 +158,41 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
                 self.do_on_disconnect()
 
     def syncall(self):
-        if not self.insync:
-            self.insync=True
-            self.set = setactions()
-            thread = Thread(target=self.syncall_threaded)
-            thread.setDaemon(True)
-            thread.start()
+        self.agent=Thread(target=self.syncall_agen)
+        self.agent.setDaemon(True)
+        self.agent.start()
+
+    def syncall_agen(self):
+        while True:
+            try:
+                if not self.thread.is_alive():
+                    self.insync=False
+                    self.logger.add("restart sync agent")
+            except:
+                pass
+            if not self.insync:
+                self.insync=True
+                self.set = setactions()
+                self.thread = Thread(target=self.syncall_threaded)
+                self.thread.setDaemon(True)
+                self.thread.start()
+            sleep(300)
 
 
     def syncall_threaded(self):
         baru=True
+        last=time.time()
         while True:
+            nu=time.time()
+            ago=nu-last
+            if ago>7200:
+                baru=True
             if os.path.isfile("again") | baru:
                 again=self.againread()
                 if os.path.isfile("again"):
                     os.remove("again")
                 notyet=True
+                last=time.time()
                 while notyet:
                     try:
                         self.logger.add("sync started")
@@ -186,7 +206,8 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
                         notyet=False
                         self.logger.add("sync finished(for now)")
                         again=self.againread()
-                    except:
+                    except Exception as e:
+                        self.logger.add(str(e))
                         self.logger.add("internet disruption? will try again soon")
                         sleep(10)
                         pass
@@ -230,7 +251,8 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
                     test = dialogs.base()
                     test.showdialog("Could not connect")
                     self.do_on_disconnect()
-        except:
+        except Exception as e:
+            self.logger.add(str(e))
             test = dialogs.base()
             test.showdialog("Could not connect")
 

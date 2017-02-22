@@ -12,6 +12,6 @@ setup(
     packages=find_packages(),
     install_requires=["tendo","onedrivesdk","inotify"],
     entry_points={'console_scripts':['sapp=remkodrive.remkodrive:main']},
-    data_files=['internal1','internal2','driveoff.ico','driveon.ico','readme']
+    data_files=['remkodrive/internal1','remkodrive/internal2','remkodrive/driveoff.ico','remkodrive/driveon.ico','remkodrive/readme']
 
 )
