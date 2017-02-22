@@ -93,11 +93,19 @@ class setactions:
     def isinagaindelete(self,full,again):
         isit=False
         for a in again:
+            if (full.index(a[3])>=0) & (a[2]==""):
+                if a[0] == 'delete':
+                    isit = True
+                    break
+
             if a[3]==full:
                 if a[0]=='delete':
                     isit=True
                     break
+
         return isit
+
+
     def checkall(self,exclude,basepath,client,again):
         actions=[]
         remote,dirtrans=client.getfiles(exclude=exclude)

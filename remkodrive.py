@@ -8,8 +8,6 @@ import json
 import pickle
 from setactions import *
 from doactions import *
-import asyncio
-from _thread import *
 from threading import *
 import subprocess
 import inotify.adapters
@@ -19,8 +17,6 @@ import log
 class SystemTrayIcon(QtGui.QSystemTrayIcon):
 
     def __init__(self, icon, parent=None):
-
-        modified=0
         self.iswatch=False
         self.logger=log.log()
         self.basepath=os.path.expanduser('~')+"/onedrive"
@@ -56,11 +52,14 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
         self.intialsyncdone=False
         self.stuff = stuff()
         if self.stuff.hassaved():
-            try:
-                self.stuff.reconnect()
-                self.enter()
-            except:
-                pass
+            self.recon()
+
+    def recon(self):
+        try:
+            self.stuff.reconnect()
+            self.enter()
+        except:
+            pass
 
     def setoptions(self):
         dia=dialogs.option()
@@ -108,12 +107,11 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
 
     def watch(self):
         i = inotify.adapters.InotifyTree((bytes(self.basepath, "UTF-8")))
-        #i.add_watch(bytes(self.basepath, "UTF-8"))
-        file_name = "again"
         try:
             for event in i.event_gen():
                 if event is not None:
                      (header, type_names, path, filename) = event
+                     print(header,type_names,path,filename)
                      if type_names[0]=='IN_CREATE':
                          print(type_names,path, filename)
                          self.logger.add("File created " + path.decode() + "/" + filename.decode())
@@ -124,7 +122,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
 
 
         finally:
-            pass
+            self.logger.add("the directory watcher quit!")
 
     def openmainfolder(self):
         subprocess.Popen(["xdg-open", self.basepath])
@@ -231,8 +229,6 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
             self.do_on_disconnect()
         except:
             self.do_on_disconnect()
-
-
 
     def updateIcon(self, connected):
         if connected:
