@@ -7,7 +7,7 @@ This is an new project (my first in python so the code still sucks) to make an u
 To install:
 
 - make anaconda env from enviroment.yml 
- python remkodrive.py
+  python remkodrive.py
  
  If you don't know how to do this, don't use this app yet...Still very much in development...
  
@@ -31,10 +31,13 @@ To install:
  
  remko66 (at) gmail.com
  
+ copyright: You have the right to copy. (gnu or something, anyway i won't bother you)
  
+ Any questions before i have time to document the code and improve it? Mail me...don't be lazy i love getting feedback.
+
 
 Main depencencies
  pyqt4
-pip install onedrivesdk
+ pip install onedrivesdk
  pip install tendo
  pip install inotify
