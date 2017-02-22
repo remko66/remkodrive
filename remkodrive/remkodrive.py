@@ -122,9 +122,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
             for event in i.event_gen():
                 if event is not None:
                      (header, type_names, path, filename) = event
-                     print(header,type_names,path,filename)
                      if (type_names[0]=='IN_CREATE') | (type_names[0]=='IN_MOVED_TO'):
-                         print(type_names,path, filename)
                          self.logger.add("File created " + path.decode() + "/" + filename.decode())
                          self.againwrite(type_names[0],path,filename)
                      if type_names[0] == 'IN_MOVED_FROM':
@@ -190,6 +188,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
                         again=self.againread()
                     except:
                         self.logger.add("internet disruption? will try again soon")
+                        sleep(10)
                         pass
                     sleep(20)
 

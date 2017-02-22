@@ -41,17 +41,30 @@ class doit:
         c = time.mktime(t.timetuple())
         os.utime( full, (c, c))
         return returned_item
+
     def delete(self,item,path):
         try:
             returned_item = self.client.item(drive='me', id=item.id).delete()
         except:
             pass
 
+    def checkparent(self,folder,dirtrans):
+        if (folder+"/") in dirtrans:
+            return dirtrans
+        i = folder.rfind("/")
+        if i > 0:
+            foldername = folder[i + 1:]
+            folder = folder[:i]
+            dirtrans=self.checkparent(folder,dirtrans)
+            dirtrans=self.newfolder(foldername,folder,dirtrans)
+        else:
+            return dirtrans
     def newfolder(self,name,parent,dirtrans):
+        dirtrans=self.checkparent(parent,dirtrans)
         if parent=="/":
             item='root'
         else:
-            item=dirtrans[parent].id
+            item=dirtrans[parent+"/"].id
         f = onedrivesdk.Folder()
         i = onedrivesdk.Item()
         i.name = name
@@ -69,15 +82,30 @@ class doit:
 
 
     def runactionqueue(self,actions,basepath,dirtrans):
+        oke=False
+        count=0
+        while not oke:
+            count+=1
+            if count>8:
+                oke=True
+            try:
+                for a in actions:
+                    if a[0] == 'newfolder':
+                        dirtrans = self.newfolder(a[1], a[4], dirtrans)
+            except:
+                pass
         for a in actions:
-            if a[0]=='download':
-                self.download(a[1],a[2],basepath)
-            if a[0]=='upload':
-                self.upload(a[1],a[2],a[4],basepath,dirtrans)
-            if a[0]=='newfolder':
-                dirtrans=self.newfolder(a[1],a[4],dirtrans)
-            if a[0] == 'delete':
-                 self.delete(a[1], a[2])
+            try:
+                if a[0]=='download':
+                    self.download(a[1],a[2],basepath)
+                if a[0]=='upload':
+                    self.upload(a[1],a[2],a[4],basepath,dirtrans)
+                if a[0]=='newfolder':
+                    dirtrans=self.newfolder(a[1],a[4],dirtrans)
+                if a[0] == 'delete':
+                     self.delete(a[1], a[2])
+            except:
+                pass
         return dirtrans
 
 
