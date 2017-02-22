@@ -1,0 +1,14 @@
+
+
+
+
+ms interface
+id:281246d3-9e8a-454f-a96a-ddf8b3555d31
+password: yBqpBnvPUc42Z3hKr5GMY9K
+
+
+
+pyqt4
+pip install onedrivesdk
+ pip install tendo
+ pip install inotify
