@@ -29,6 +29,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
         self.login = menu.addAction("Start syncing")
         self.forcem = menu.addAction("Force full sync")
         self.open = menu.addAction("open folder")
+        self.browser=menu.addAction("Open in browser")
         self.excludemen = menu.addAction("Edit exclude list")
         self.logout = menu.addAction("Stop syncing")
         self.options = menu.addAction("Options")
@@ -40,6 +41,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
         self.login.triggered.connect(self.enter)
         self.forcem.triggered.connect(self.force)
         self.logout.triggered.connect(self.exit)
+        self.browser.triggered.connect(self.inbrowser)
         self.viewlog.triggered.connect(self.viewstatus)
         self.open.triggered.connect(self.openmainfolder)
         self.excludemen.triggered.connect(self.exclude_dialog)
@@ -53,6 +55,12 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
         self.stuff = stuff()
         if self.stuff.hassaved():
             self.recon()
+
+    def inbrowser(self):
+        import webbrowser
+        new = 2  # open in a new tab, if possible
+        url = "https://onedrive.live.com/?id=root"
+        webbrowser.open(url, new=new)
 
     def recon(self):
         try:
@@ -84,10 +92,13 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
 
     def againread(self):
         againlist=[]
-        if os.path.isfile("again"):
-            with open("again", "rb") as myfile:
-                againlist = pickle.load(myfile)
-        return againlist
+        try:
+            if os.path.isfile("again"):
+                with open("again", "rb") as myfile:
+                    againlist = pickle.load(myfile)
+        except:
+            pass
+            return againlist
 
     def againwrite(self,type,path,filename):
         list=self.againread()
@@ -112,7 +123,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
                 if event is not None:
                      (header, type_names, path, filename) = event
                      print(header,type_names,path,filename)
-                     if type_names[0]=='IN_CREATE':
+                     if (type_names[0]=='IN_CREATE') | (type_names[0]=='IN_MOVED_TO'):
                          print(type_names,path, filename)
                          self.logger.add("File created " + path.decode() + "/" + filename.decode())
                          self.againwrite(type_names[0],path,filename)
@@ -176,6 +187,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
                         baru=False
                         notyet=False
                         self.logger.add("sync finished(for now)")
+                        again=self.againread()
                     except:
                         self.logger.add("internet disruption? will try again soon")
                         pass
