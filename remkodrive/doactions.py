@@ -47,7 +47,7 @@ class doit:
         try:
             returned_item = self.client.item(drive='me', id=item.id).delete()
         except Exception as e:
-            self.logger.add(str(e))
+            self.logger.add(str(e)+"delete item")
 
     def checkparent(self, folder, dirtrans):
         if (folder + "/") in dirtrans:
@@ -82,6 +82,7 @@ class doit:
         return dirtrans
 
     def runactionqueue(self, actions, basepath, dirtrans):
+        ex=False
         oke = False
         count = 0
         while not oke:
@@ -106,5 +107,6 @@ class doit:
                     self.delete(a[1], a[2])
 
             except Exception as e:
-                self.logger.add(str(e))
-        return dirtrans
+                self.logger.add(str(e)+" runactionqueue")
+                ex=True
+        return dirtrans,Ex

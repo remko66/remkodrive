@@ -195,19 +195,21 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
                 last=time.time()
                 while notyet:
                     try:
+                        ex=True
                         self.logger.add("sync started")
                         action, dirtrans,remote = self.set.checkall(self.exclude, self.basepath, self.stuff,again)
                         do = doit(self.stuff.client)
                         do.setlogger(self.logger)
-                        do.runactionqueue(action, self.basepath,dirtrans)
+                        dirtrans,ex=do.runactionqueue(action, self.basepath,dirtrans)
                         self.insync=False
                         self.intialsyncdone=True
                         baru=False
-                        notyet=False
-                        self.logger.add("sync finished(for now)")
-                        again=self.againread()
+                        if not ex:
+                            notyet=False
+                            self.logger.add("sync finished(for now)")
+                            again=self.againread()
                     except Exception as e:
-                        self.logger.add(str(e))
+                        self.logger.add(str(e)+" syncall_threaded")
                         self.logger.add("internet disruption? will try again soon")
                         sleep(10)
                         pass
