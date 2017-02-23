@@ -53,7 +53,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
         self.root=None
         self.insync=False
         self.intialsyncdone=False
-        self.stuff = stuff()
+        self.stuff = stuff(self.logger)
         if self.stuff.hassaved():
             self.recon()
 
@@ -98,8 +98,10 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
                 with open("again", "rb") as myfile:
                     againlist = pickle.load(myfile)
         except:
-            pass
-            return againlist
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+        return againlist
 
     def againwrite(self,type,path,filename):
         list=self.againread()
@@ -172,7 +174,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
                 pass
             if not self.insync:
                 self.insync=True
-                self.set = setactions()
+                self.set = setactions(self.logger)
                 self.thread = Thread(target=self.syncall_threaded)
                 self.thread.setDaemon(True)
                 self.thread.start()
@@ -187,16 +189,18 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
             ago=nu-last
             if ago>7200:
                 baru=True
-            if os.path.isfile("again") | baru:
+            if  baru:
                 again=self.againread()
                 if os.path.isfile("again"):
                     os.remove("again")
+
                 notyet=True
                 last=time.time()
                 while notyet:
                     try:
                         ex=True
                         self.logger.add("sync started")
+
                         action, dirtrans,remote = self.set.checkall(self.exclude, self.basepath, self.stuff,again)
                         do = doit(self.stuff.client)
                         do.setlogger(self.logger)
@@ -209,6 +213,9 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
                             self.logger.add("sync finished(for now)")
                             again=self.againread()
                     except Exception as e:
+                        exc_type, exc_obj, exc_tb = sys.exc_info()
+                        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                        print(exc_type, fname, exc_tb.tb_lineno)
                         self.logger.add(str(e)+" syncall_threaded")
                         self.logger.add("internet disruption? will try again soon")
                         sleep(10)
@@ -240,7 +247,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
         self.enter()
 
     def enter(self):
-        self.stuff = stuff()
+        self.stuff = stuff(self.logger)
         try:
             if self.stuff.isNowConnected():
                 self.do_on_connect()

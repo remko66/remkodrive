@@ -109,4 +109,4 @@ class doit:
             except Exception as e:
                 self.logger.add(str(e)+" runactionqueue")
                 ex=True
-        return dirtrans,Ex
+        return dirtrans,ex

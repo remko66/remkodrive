@@ -6,7 +6,7 @@ import pickle
 
 
 class stuff:
-    def __init__(self):
+    def __init__(self,logger):
 
         with open("internal1", "rb") as myfile:
             self.client_secret = pickle.load(myfile)
@@ -17,6 +17,7 @@ class stuff:
         self.scopes = ['wl.signin', 'wl.offline_access', 'onedrive.readwrite']
         self.client = False
         self.isconnected = False
+        self.logger=logger
 
     def getclient(self):
         return self.client
@@ -97,17 +98,48 @@ class stuff:
 
     def getfiles(self, folder='root', path='/', list=[], exclude=[], dirtrans={}):
         print("getfiles", folder, path)
-        collection = self.client.item(drive='me', id=folder).children.get()
-        for i in collection:
-            t = i.folder
-            if not t == None:
-                if (not i.name in exclude) | (folder != 'root'):
-                    p2 = path + i.name + '/'
-                    dirtrans[p2] = i
-                    list, dirtrans = self.getfiles(folder=i.id, path=p2, list=list, exclude=exclude, dirtrans=dirtrans)
 
-            else:
-                g = [folder, path, i]
-                list.append(g)
+        gotit=False
+        maxcount=0
+        while not gotit:
+            try:
+                maxcount += 1
+                collection = self.client.item(drive='me', id=folder).children.get()
 
+                gotit=True
+            except Exception as e:
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print(exc_type, fname, exc_tb.tb_lineno)
+                self.logger.add("getfiles hickup"+str(e))
+                if maxcount>10:
+                     collection = self.client.item(drive='me', id=folder).children.get()
+                     gotit=True
+                sleep(15)
+        try:
+            if not collection==None:
+                for i in collection:
+                    t = i.folder
+                    if not t == None:
+                        if not i.name[0]==".":
+                            if (not i.name in exclude) | (folder != 'root'):
+                                p2 = path + i.name + '/'
+                                dirtrans[p2] = i
+                                list, dirtrans = self.getfiles(folder=i.id, path=p2, list=list, exclude=exclude, dirtrans=dirtrans)
+
+                    else:
+                        g = [folder, path, i]
+                        list.append(g)
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+            self.logger.add(str(e) + " syncall_threaded")
+            self.logger.add("internet disruption? will try again soon")
         return list, dirtrans
+
+        def getdelte(item,token=""):
+            collection_page = self.client.item(id=item.id).delta(token).get()
+            print(collection_page.token)
+            for i in collection:
+                print(i.name)

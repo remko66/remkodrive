@@ -4,8 +4,8 @@ from time import *
 import os
 import datetime
 class setactions:
-    def __init__(self):
-        self.stuf =stuff()
+    def __init__(self,logger):
+        self.stuf =stuff(logger)
 
 
     def modification_date(self,filename):
@@ -91,50 +91,65 @@ class setactions:
         return action
 
     def isinagaindelete(self,full,again):
-        isit=False
-        for a in again:
-            if (full.index(a[3])>=0) & (a[2]==""):
-                if a[0] == 'delete':
-                    isit = True
-                    break
 
-            if a[3]==full:
-                if a[0]=='delete':
-                    isit=True
-                    break
+        isit=False
+        try:
+            for a in again:
+                if (full.index(a[3])>=0) & (a[2]==""):
+                    if a[0] == 'delete':
+                        isit = True
+                        break
+
+                if a[3]==full:
+                    if a[0]=='delete':
+                        isit=True
+                        break
+
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+            print(full,again)
 
         return isit
 
 
     def checkall(self,exclude,basepath,client,again):
-        actions=[]
-        remote,dirtrans=client.getfiles(exclude=exclude)
-        system=systemstuff(basepath)
-        here=system.buildlist()
-        comblist=[]
-        for h in here:
-            co=h[0]+"/"+h[1]
-            co=co.replace("//","/")
-            comblist.append(co)
-        for i,r in enumerate(remote):
-            full=basepath+r[1]+r[2].name
-            if not full in comblist:
-                if not self.isinagaindelete(full,again):
-                    actions.append(self.addaction("download",r[2],full))
+        try:
+            actions=[]
+            remote,dirtrans=client.getfiles(exclude=exclude)
+            system=systemstuff(basepath)
+            here=system.buildlist()
+            comblist=[]
+            for h in here:
+                co=h[0]+"/"+h[1]
+                co=co.replace("//","/")
+                comblist.append(co)
+            for i,r in enumerate(remote):
+                full=basepath+r[1]+r[2].name
+                if not full in comblist:
+                    if not self.isinagaindelete(full,again):
+                        actions.append(self.addaction("download",r[2],full))
+                    else:
+                        actions.append(self.addaction("delete", r[2], full))
                 else:
-                    actions.append(self.addaction("delete", r[2], full))
-            else:
-                a=self.examine(full,r[2])
-                if a==1:
-                    actions.append(self.addaction("download", r[2], full))
-                if a==2:
-                    actions.append(self.addaction("upload", r[2], full))
+                    a=self.examine(full,r[2])
+                    if a==1:
+                        actions.append(self.addaction("download", r[2], full))
+                    if a==2:
+                        actions.append(self.addaction("upload", r[2], full))
 
-        for k in here:
-            i=self.getitem(k,remote,basepath)
-            if (i==None) | (self.examine(k[0]+"/"+k[1],i)==2):
-                actions = self.checkfolders(remote, k[0].replace(basepath,""), actions,dirtrans)
-                actions.append(self.addaction("upload", i, k[0],None,k[1]))
-        actions=self.make_unique(actions)
+            for k in here:
+                i=self.getitem(k,remote,basepath)
+                if (i==None) | (self.examine(k[0]+"/"+k[1],i)==2):
+                    actions = self.checkfolders(remote, k[0].replace(basepath,""), actions,dirtrans)
+                    actions.append(self.addaction("upload", i, k[0],None,k[1]))
+            actions=self.make_unique(actions)
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+            self.logger.add(str(e) + " syncall_threaded")
+            self.logger.add("internet disruption? will try again soon")
         return actions,dirtrans,remote
 
