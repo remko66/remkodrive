@@ -44,9 +44,12 @@ class setactions:
                     break
         return index
 
-    def folderexists(self,remote,folder,dirtrans):
+    def folderexists(self,remote,folder,dirtrans,exclude):
 
         ex=False
+        root=folder.replace("/","")
+        if root  in exclude:
+            return True
         index=None
         if folder=="":
             folder="/"
@@ -66,11 +69,11 @@ class setactions:
         [unique_list.append(obj) for obj in original_list if obj not in unique_list]
         return unique_list
 
-    def checkfolders(self,remote,folder,action,dirtrans):
+    def checkfolders(self,remote,folder,action,dirtrans,exclude):
         makelist=[]
         count=0
         full=folder
-        bool,index=self.folderexists(remote,folder,dirtrans)
+        bool,index=self.folderexists(remote,folder,dirtrans,exclude)
         while not bool:
             count+=1
             if count==10:
@@ -137,13 +140,15 @@ class setactions:
                     if a==1:
                         actions.append(self.addaction("download", r[2], full))
                     if a==2:
-                        actions.append(self.addaction("upload", r[2], full))
+                        if not r[1] in exclude:
+                            actions.append(self.addaction("upload", r[2], full))
 
             for k in here:
                 i=self.getitem(k,remote,basepath)
                 if (i==None) | (self.examine(k[0]+"/"+k[1],i)==2):
-                    actions = self.checkfolders(remote, k[0].replace(basepath,""), actions,dirtrans)
-                    actions.append(self.addaction("upload", i, k[0],None,k[1]))
+                    if not k[0].replace(basepath + "/", "") in exclude:
+                        actions = self.checkfolders(remote, k[0].replace(basepath,""), actions,dirtrans,exclude)
+                        actions.append(self.addaction("upload", i, k[0],None,k[1]))
             actions=self.make_unique(actions)
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()

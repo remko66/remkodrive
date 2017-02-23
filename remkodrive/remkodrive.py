@@ -140,7 +140,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
         subprocess.Popen(["xdg-open", self.basepath])
 
     def exclude_dialog(self):
-        self.stuff = stuff()
+        self.stuff = stuff(self.logger)
         if self.stuff.isNowConnected():
             if self.root ==None:
                 self.root = self.stuff.getroot()
@@ -165,6 +165,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
         self.agent.start()
 
     def syncall_agen(self):
+        last=0
         while True:
             try:
                 if not self.thread.is_alive():
@@ -173,12 +174,15 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
             except:
                 pass
             if not self.insync:
-                self.insync=True
-                self.set = setactions(self.logger)
-                self.thread = Thread(target=self.syncall_threaded)
-                self.thread.setDaemon(True)
-                self.thread.start()
-            sleep(300)
+                ago = time.time()-last
+                if (ago>3600) | (len(self.againread())>0):
+                    last=time.time()
+                    self.insync=True
+                    self.set = setactions(self.logger)
+                    self.thread = Thread(target=self.syncall_threaded)
+                    self.thread.setDaemon(True)
+                    self.thread.start()
+            sleep(30)
 
 
     def syncall_threaded(self):
