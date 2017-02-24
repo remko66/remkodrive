@@ -3,7 +3,7 @@ import os
 from onedrivesdk.helpers import GetAuthCodeServer
 import sys
 import pickle
-
+import time
 
 class stuff:
     def __init__(self,logger):
@@ -115,7 +115,7 @@ class stuff:
                 if maxcount>10:
                      collection = self.client.item(drive='me', id=folder).children.get()
                      gotit=True
-                sleep(15)
+                time.sleep(15)
         try:
             if not collection==None:
                 for i in collection:
