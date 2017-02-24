@@ -1,8 +1,8 @@
-##RemkoDrive a onedrive client for Mint and Ubuntu (well, only tested on mint)
+RemkoDrive a onedrive client for Mint and Ubuntu (well, only tested on mint)
 
 
 
-<b>To install:</b>
+To install:
 - sudo apt-get install python-qt4
 - make anaconda env from enviroment.yml 
 - python remkodrive.py
@@ -11,7 +11,7 @@
  
  If you don't know how to do this, don't use this app yet...don't have an install script yet.
  
- <b>Known issues:</b>
+Known issues:
  
  - in case of copy on computer it deletes the old and reuploads (not fun if there are big files in there!)
  - Move the same
