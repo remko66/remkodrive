@@ -5,8 +5,23 @@ RemkoDrive a onedrive client for Mint and Ubuntu (well, only tested on mint)
 To install:
 - sudo apt-get install python-qt4
 - make anaconda env from enviroment.yml 
-- python remkodrive.py
+
+
+Alternative:
+- sudo apt-get install python3-pyqt4
+- pip3 install onedrivesdk
+- pip3 install tendo
+- pip3 install inotify
  
+ 
+To start:
+
+In the remkodrive directory
+python remkodrive.py
+
+
+Offcourse you can add it to the linux mint menu.
+
  You can also run it from the mint menu
  
  If you don't know how to do this, don't use this app yet...don't have an install script yet.
@@ -28,7 +43,7 @@ Known issues:
  remko66 (at) gmail.com
  
  copyright: You have the right to copy. (gnu or something, anyway i won't bother you)
-  This is still in development. No garantee given or im
+  This is still in development. No garantee given or implied
  
  Any questions before i have time to document the code and improve it? Mail me...don't be lazy i love getting feedback.
 
