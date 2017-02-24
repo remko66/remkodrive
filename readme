@@ -5,13 +5,11 @@
 This is an new project (my first in python so the code still sucks) to make an ubunt/mint onedrive client
 
 To install:
-
+- sudo apt-get install python-qt4
 - make anaconda env from enviroment.yml 
-  python remkodrive.py
+- python remkodrive.py
  
  If you don't know how to do this, don't use this app yet...Still very much in development...
- 
- btw who has experience with setup tools ? (haven't had time to figure it out yet) so i can give this to some friends to test
  
  Known issues:
  
@@ -20,7 +18,7 @@ To install:
  - if you delete files in your webbrowser on your onedrive they will  be reuploaded
  - no decent delta token implementation (basically on startup it always compares all files on date/time last modified)
  
- Do not use this in production yet!
+ This is still in development. No garantee given or implied!
  
  It will put an icon in the traybar like for example insync does
  
