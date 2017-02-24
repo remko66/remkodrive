@@ -37,7 +37,7 @@ To install:
 
 
 Main depencencies
- pyqt4
- pip install onedrivesdk
- pip install tendo
- pip install inotify
+sudo apt-get install python3-pyqt4
+pip3 install onedrivesdk
+pip3 install tendo
+pip3 install inotify

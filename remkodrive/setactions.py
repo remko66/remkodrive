@@ -6,6 +6,7 @@ import datetime
 class setactions:
     def __init__(self,logger):
         self.stuf =stuff(logger)
+        self.logger=logger
 
 
     def modification_date(self,filename):
@@ -87,7 +88,7 @@ class setactions:
             if under=="":
                 under="/"
             makelist.append([foldername,under])
-            bool, index = self.folderexists(remote,folder,dirtrans)
+            bool, index = self.folderexists(remote,folder,dirtrans,exclude)
         if bool:
              for foldername in makelist:
                  action.append(self.addaction("newfolder",foldername[0],"",index,foldername[1]))
@@ -130,18 +131,19 @@ class setactions:
                 comblist.append(co)
             for i,r in enumerate(remote):
                 full=basepath+r[1]+r[2].name
-                if not full in comblist:
-                    if not self.isinagaindelete(full,again):
-                        actions.append(self.addaction("download",r[2],full))
+                if not "." in r[1]:
+                    if not full in comblist:
+                        if not self.isinagaindelete(full,again):
+                            actions.append(self.addaction("download",r[2],full))
+                        else:
+                            actions.append(self.addaction("delete", r[2], full))
                     else:
-                        actions.append(self.addaction("delete", r[2], full))
-                else:
-                    a=self.examine(full,r[2])
-                    if a==1:
-                        actions.append(self.addaction("download", r[2], full))
-                    if a==2:
-                        if not r[1] in exclude:
-                            actions.append(self.addaction("upload", r[2], full))
+                        a=self.examine(full,r[2])
+                        if a==1:
+                            actions.append(self.addaction("download", r[2], full))
+                        if a==2:
+                            if not r[1] in exclude:
+                                actions.append(self.addaction("upload", r[2], full))
 
             for k in here:
                 i=self.getitem(k,remote,basepath)

@@ -19,7 +19,8 @@ class systemstuff:
             print(parent,directory)
             if parent and not os.path.isdir(parent): self.mkdir(parent)
             print(_dir)
-            if directory: os.mkdir(_dir)
+            if directory:
+                os.mkdir(_dir)
 
 
     def hashfile(self,path):
@@ -35,8 +36,15 @@ class systemstuff:
 
 
     def buildlist(self,path="/"):
-        list=[]
-        for path, dirs, files in os.walk(self.basepath+path):
-            for f in files:
-               list.append([path,f])
+        try:
+
+            list=[]
+            for path, dirs, files in os.walk(self.basepath+path):
+                for f in files:
+                    if not "." in path:
+                        list.append([path,f])
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
         return list

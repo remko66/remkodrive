@@ -4,7 +4,6 @@ from onedrivestuff import *
 import dialogs
 from tendo import singleton
 from filesystemstuff import *
-import json
 import pickle
 from setactions import *
 from doactions import *
@@ -182,7 +181,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
                     self.thread = Thread(target=self.syncall_threaded)
                     self.thread.setDaemon(True)
                     self.thread.start()
-            sleep(30)
+            time.sleep(30)
 
 
     def syncall_threaded(self):
@@ -222,9 +221,9 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
                         print(exc_type, fname, exc_tb.tb_lineno)
                         self.logger.add(str(e)+" syncall_threaded")
                         self.logger.add("internet disruption? will try again soon")
-                        sleep(10)
+                        time.sleep(10)
                         pass
-                    sleep(20)
+                    time.sleep(20)
 
     def do_on_connect(self):
         self.login.setVisible(False)
