@@ -99,7 +99,7 @@ class setactions:
         isit=False
         try:
             for a in again:
-                if (full.index(a[3])>=0) & (a[2]==""):
+                if (a[3] in full>=0) & (a[2]==""):
                     if a[0] == 'delete':
                         isit = True
                         break

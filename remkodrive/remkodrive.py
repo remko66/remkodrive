@@ -80,7 +80,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
 
         if not self.iswatch:
             self.watch = Thread(target=self.watch)
-            self.watch.setDaemon(True)
+            #self.watch.setDaemon(True)
             self.watch.start()
             self.iswatch = True
 
@@ -159,7 +159,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
 
     def syncall(self):
         self.agent = Thread(target=self.syncall_agen)
-        self.agent.setDaemon(True)
+        #self.agent.setDaemon(True)
         self.agent.start()
 
     def syncall_agen(self):
@@ -169,6 +169,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
                 if not self.thread.is_alive():
                     self.insync = False
                     self.logger.add("restart sync agent")
+
             except:
                 pass
             if not self.insync:
@@ -178,7 +179,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
                     self.insync = True
                     self.set = setactions(self.logger)
                     self.thread = Thread(target=self.syncall_threaded)
-                    self.thread.setDaemon(True)
+                    #self.thread.setDaemon(True)
                     self.thread.start()
             time.sleep(30)
 
