@@ -15,25 +15,24 @@ import time
 
 
 class SystemTrayIcon(QtGui.QSystemTrayIcon):
-
     def __init__(self, icon, parent=None):
-        self.iswatch=False
-        self.logger=log.log()
-        self.basepath=os.path.expanduser('~')+"/onedrive"
+        self.iswatch = False
+        self.logger = log.log()
+        self.basepath = os.path.expanduser('~') + "/onedrive"
         self.optionsread()
-        fs=systemstuff(self.basepath)
+        fs = systemstuff(self.basepath)
         fs.mkdir(self.basepath)
-        self.exclude=self.read_exclude()
+        self.exclude = self.read_exclude()
         QtGui.QSystemTrayIcon.__init__(self, icon, parent)
         menu = QtGui.QMenu(parent)
         self.login = menu.addAction("Start syncing")
         self.forcem = menu.addAction("Force full sync")
         self.open = menu.addAction("open folder")
-        self.browser=menu.addAction("Open in browser")
+        self.browser = menu.addAction("Open in browser")
         self.excludemen = menu.addAction("Edit exclude list")
         self.logout = menu.addAction("Stop syncing")
         self.options = menu.addAction("Options")
-        self.viewlog= menu.addAction("Status")
+        self.viewlog = menu.addAction("Status")
         exitAction = menu.addAction("Exit")
         self.setContextMenu(menu)
         exitAction.triggered.connect(QtGui.qApp.quit)
@@ -49,9 +48,9 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
         self.logout.setVisible(False)
         self.updateIcon(False)
         self.updateIcon(False)
-        self.root=None
-        self.insync=False
-        self.intialsyncdone=False
+        self.root = None
+        self.insync = False
+        self.intialsyncdone = False
         self.stuff = stuff(self.logger)
         if self.stuff.hassaved():
             self.recon()
@@ -70,11 +69,13 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
             pass
 
     def setoptions(self):
-        dia=dialogs.option()
+        dia = dialogs.option()
         dia.showdialog(self.basepath)
+
     def viewstatus(self):
-        dia=dialogs.log()
+        dia = dialogs.log()
         dia.showdialog(self.logger.log)
+
     def watchon(self):
 
         if not self.iswatch:
@@ -88,10 +89,8 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
             with open("options", "rb") as myfile:
                 self.basepath = pickle.load(myfile)
 
-
-
     def againread(self):
-        againlist=[]
+        againlist = []
         try:
             if os.path.isfile("again"):
                 with open("again", "rb") as myfile:
@@ -102,16 +101,16 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
             print(exc_type, fname, exc_tb.tb_lineno)
         return againlist
 
-    def againwrite(self,type,path,filename):
-        list=self.againread()
-        if type=='IN_CREATE':
-            type='new'
-        if type=='IN_MOVED_FROM':
-            type="delete"
+    def againwrite(self, type, path, filename):
+        list = self.againread()
+        if type == 'IN_CREATE':
+            type = 'new'
+        if type == 'IN_MOVED_FROM':
+            type = "delete"
 
-        full=path.decode() + "/" + filename.decode()
-        full.replace("//","/")
-        item=[type,path,filename.decode(),full]
+        full = path.decode() + "/" + filename.decode()
+        full.replace("//", "/")
+        item = [type, path, filename.decode(), full]
         list.append(item)
 
         file_name = "again"
@@ -123,13 +122,13 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
         try:
             for event in i.event_gen():
                 if event is not None:
-                     (header, type_names, path, filename) = event
-                     if (type_names[0]=='IN_CREATE') | (type_names[0]=='IN_MOVED_TO'):
-                         self.logger.add("File created " + path.decode() + "/" + filename.decode())
-                         self.againwrite(type_names[0],path,filename)
-                     if type_names[0] == 'IN_MOVED_FROM':
-                         self.logger.add("File moved or delete "+path.decode()+"/"+filename.decode())
-                         self.againwrite(type_names[0], path, filename)
+                    (header, type_names, path, filename) = event
+                    if (type_names[0] == 'IN_CREATE') | (type_names[0] == 'IN_MOVED_TO'):
+                        self.logger.add("File created " + path.decode() + "/" + filename.decode())
+                        self.againwrite(type_names[0], path, filename)
+                    if type_names[0] == 'IN_MOVED_FROM':
+                        self.logger.add("File moved or delete " + path.decode() + "/" + filename.decode())
+                        self.againwrite(type_names[0], path, filename)
 
 
         finally:
@@ -141,12 +140,12 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
     def exclude_dialog(self):
         self.stuff = stuff(self.logger)
         if self.stuff.isNowConnected():
-            if self.root ==None:
+            if self.root == None:
                 self.root = self.stuff.getroot()
-            ex=dialogs.exlude_dialog(self.read_exclude(),self.root)
+            ex = dialogs.exlude_dialog(self.read_exclude(), self.root)
             ex.showdialog("Check dirs to exclude")
             if ex.haslist:
-                self.exclude=ex.getlist()
+                self.exclude = ex.getlist()
                 self.write_exclude(self.exclude)
         else:
             if self.stuff.connect():
@@ -159,67 +158,66 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
                 self.do_on_disconnect()
 
     def syncall(self):
-        self.agent=Thread(target=self.syncall_agen)
+        self.agent = Thread(target=self.syncall_agen)
         self.agent.setDaemon(True)
         self.agent.start()
 
     def syncall_agen(self):
-        last=0
+        last = 0
         while True:
             try:
                 if not self.thread.is_alive():
-                    self.insync=False
+                    self.insync = False
                     self.logger.add("restart sync agent")
             except:
                 pass
             if not self.insync:
-                ago = time.time()-last
-                if (ago>3600) | (len(self.againread())>0):
-                    last=time.time()
-                    self.insync=True
+                ago = time.time() - last
+                if (ago > 3600) | (len(self.againread()) > 0):
+                    last = time.time()
+                    self.insync = True
                     self.set = setactions(self.logger)
                     self.thread = Thread(target=self.syncall_threaded)
                     self.thread.setDaemon(True)
                     self.thread.start()
             time.sleep(30)
 
-
     def syncall_threaded(self):
-        baru=True
-        last=time.time()
+        baru = True
+        last = time.time()
         while True:
-            nu=time.time()
-            ago=nu-last
-            if ago>7200:
-                baru=True
-            if  baru:
-                again=self.againread()
+            nu = time.time()
+            ago = nu - last
+            if ago > 7200:
+                baru = True
+            if baru:
+                again = self.againread()
                 if os.path.isfile("again"):
                     os.remove("again")
 
-                notyet=True
-                last=time.time()
+                notyet = True
+                last = time.time()
                 while notyet:
                     try:
-                        ex=True
+                        ex = True
                         self.logger.add("sync started")
 
-                        action, dirtrans,remote = self.set.checkall(self.exclude, self.basepath, self.stuff,again)
+                        action, dirtrans, remote = self.set.checkall(self.exclude, self.basepath, self.stuff, again)
                         do = doit(self.stuff.client)
                         do.setlogger(self.logger)
-                        dirtrans,ex=do.runactionqueue(action, self.basepath,dirtrans)
-                        self.insync=False
-                        self.intialsyncdone=True
-                        baru=False
+                        dirtrans, ex = do.runactionqueue(action, self.basepath, dirtrans)
+                        self.insync = False
+                        self.intialsyncdone = True
+                        baru = False
                         if not ex:
-                            notyet=False
+                            notyet = False
                             self.logger.add("sync finished(for now)")
-                            again=self.againread()
+                            again = self.againread()
                     except Exception as e:
                         exc_type, exc_obj, exc_tb = sys.exc_info()
                         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
                         print(exc_type, fname, exc_tb.tb_lineno)
-                        self.logger.add(str(e)+" syncall_threaded")
+                        self.logger.add(str(e) + " syncall_threaded")
                         self.logger.add("internet disruption? will try again soon")
                         time.sleep(10)
                         pass
@@ -229,11 +227,10 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
         self.login.setVisible(False)
         self.logout.setVisible(True)
         self.updateIcon(True)
-        self.root=self.stuff.getroot()
+        self.root = self.stuff.getroot()
         self.syncall()
         self.watchon()
         self.logger.add("cool...we are now connected")
-
 
     def do_on_disconnect(self):
         self.login.setVisible(True)
@@ -246,7 +243,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
         self.logger.add("We stopped syncing (i guess, better close this app)")
 
     def force(self):
-        self.intialsyncdone=False
+        self.intialsyncdone = False
         self.enter()
 
     def enter(self):
@@ -281,7 +278,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
         else:
             self.setIcon(QtGui.QIcon("driveoff.ico"))
 
-    def write_exclude(self,data):
+    def write_exclude(self, data):
         file_name = "exclude"
         with open(file_name, 'wb') as x_file:
             pickle.dump(data, x_file)
@@ -295,7 +292,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
             else:
                 return []
         except:
-            print(  "Unexpected error:", sys.exc_info()[0])
+            print("Unexpected error:", sys.exc_info()[0])
             return []
 
 
