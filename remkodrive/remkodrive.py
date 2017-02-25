@@ -13,7 +13,7 @@ import inotify.adapters
 import log
 import time
 
-
+from multiprocessing import Process
 class SystemTrayIcon(QtGui.QSystemTrayIcon):
     def __init__(self, icon, parent=None):
         self.iswatch = False
@@ -79,7 +79,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
     def watchon(self):
 
         if not self.iswatch:
-            self.watch = Thread(target=self.watch)
+            self.watch = Process(target=self.watch)
             #self.watch.setDaemon(True)
             self.watch.start()
             self.iswatch = True
@@ -164,21 +164,30 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
 
     def syncall_agen(self):
         last = 0
+        inthr=False
+        killed=False
         while True:
+            ago = time.time() - last
             try:
                 if not self.thread.is_alive():
                     self.insync = False
                     self.logger.add("restart sync agent")
+                inthr=self.insync
+                if (ago>1800) & (last>0):
+                    inthr=False
+                    self.insync=False
+                    self.thread.terminate()
+                    killed=True
 
             except:
                 pass
-            if not self.insync:
+            if not inthr:
                 ago = time.time() - last
-                if (ago > 3600) | (len(self.againread()) > 0):
+                if (ago > 3600) | (len(self.againread()) > 0) | killed:
                     last = time.time()
                     self.insync = True
                     self.set = setactions(self.logger)
-                    self.thread = Thread(target=self.syncall_threaded)
+                    self.thread =  Process(target=self.syncall_threaded)
                     #self.thread.setDaemon(True)
                     self.thread.start()
             time.sleep(30)

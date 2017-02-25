@@ -4,6 +4,7 @@ class log:
         global loglist
         self.log=[]
 
+
     def keepsmall(self):
         if len(self.log)>200:
             self.log=self.log[len(self.log)-100:]
